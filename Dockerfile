@@ -8,5 +8,5 @@ RUN cargo build --release
 FROM rust:1.73.0-slim AS runtime
 WORKDIR /app
 # Copy the compiled binary from the builder environment # to our runtime environment
-COPY --from=builder /app/target/release/feedback-relay feedback-relay
+COPY --from=builder /app/target/release/metis metis
 ENTRYPOINT ["./metis"]
