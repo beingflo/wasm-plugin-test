@@ -1,0 +1,28 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+      - name: Build image
+        run: docker build . --tag metis
+      - name: Tag image
+        run: docker tag metis:latest ghcr.io/${{ github.actor }}/metis:latest
+      - name: Push image to GitHub Container Registry
+        run: docker push ghcr.io/${{ github.actor }}/metis:latest
