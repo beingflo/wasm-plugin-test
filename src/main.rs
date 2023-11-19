@@ -15,12 +15,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .parse()
         .expect("DOMAIN env variable malformed");
 
-    let app = Router::new().route("/push", post(push_handler)).layer(
-        CorsLayer::new()
-            .allow_origin(HeaderValue::from_str(&origin).expect("DOMAIN env variable not valid"))
-            .allow_methods(AllowMethods::any())
-            .allow_headers(AllowHeaders::any()),
-    );
+    let app = Router::new()
+        .route("/push/:bucket", post(push_handler))
+        .layer(
+            CorsLayer::new()
+                .allow_origin(
+                    HeaderValue::from_str(&origin).expect("DOMAIN env variable not valid"),
+                )
+                .allow_methods(AllowMethods::any())
+                .allow_headers(AllowHeaders::any()),
+        );
 
     axum::Server::bind(&"0.0.0.0:5005".parse().unwrap())
         .serve(app.into_make_service())
