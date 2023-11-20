@@ -1,3 +1,4 @@
+mod metrics;
 mod migration;
 mod push;
 
@@ -9,6 +10,7 @@ use axum::{
     Extension, Router,
 };
 use dotenv::dotenv;
+use metrics::metrics_handler;
 use migration::apply_migrations;
 use push::push_handler;
 use rusqlite::Connection;
@@ -31,6 +33,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let app = Router::new()
         .route("/push/:bucket", post(push_handler))
+        .route("/metrics/:bucket", get(metrics_handler))
         .layer(Extension(Arc::new(Mutex::new(conn))))
         .layer(
             CorsLayer::new()
