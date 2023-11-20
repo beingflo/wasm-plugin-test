@@ -1,13 +1,27 @@
+mod migration;
 mod push;
 
-use axum::{http::HeaderValue, routing::post, Router};
+use std::sync::Arc;
+
+use axum::{
+    http::HeaderValue,
+    routing::{get, post},
+    Extension, Router,
+};
 use dotenv::dotenv;
+use migration::apply_migrations;
 use push::push_handler;
+use rusqlite::Connection;
+use tokio::sync::Mutex;
 use tower_http::cors::{AllowHeaders, AllowMethods, CorsLayer};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
+
+    let mut conn = Connection::open_in_memory()?;
+
+    apply_migrations(&mut conn);
 
     let origin: String = dotenv::var("DOMAIN")
         .expect("DOMAIN env variable missing")
@@ -17,6 +31,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let app = Router::new()
         .route("/push/:bucket", post(push_handler))
+        .layer(Extension(Arc::new(Mutex::new(conn))))
         .layer(
             CorsLayer::new()
                 .allow_origin(
