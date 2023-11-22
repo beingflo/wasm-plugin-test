@@ -18,8 +18,8 @@ pub async fn push_handler(
     Json(body): Json<PushMetric>,
 ) -> StatusCode {
     let result = connection.lock().await.execute(
-        "INSERT INTO metrics (date, data) VALUES (?1, ?2)",
-        (body.date.unwrap(), body.data.to_owned()),
+        "INSERT INTO metrics (bucket, date, data) VALUES (?1, ?2, ?3)",
+        (bucket, body.date.unwrap(), body.data.to_owned()),
     );
 
     match result {

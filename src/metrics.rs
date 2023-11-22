@@ -8,6 +8,7 @@ use tokio::sync::Mutex;
 
 #[derive(Serialize, Debug)]
 pub struct MetricRow {
+    bucket: String,
     date: Option<String>,
     data: Value,
 }
@@ -17,14 +18,17 @@ pub async fn metrics_handler(
     connection: Extension<Arc<Mutex<Connection>>>,
 ) -> Json<Vec<MetricRow>> {
     let connection = connection.lock().await;
-    let mut stmt = connection.prepare("SELECT * FROM metrics").unwrap();
-    let mut rows = stmt.query([]).unwrap();
+    let mut stmt = connection
+        .prepare("SELECT * FROM metrics WHERE bucket = ?1")
+        .unwrap();
+    let mut rows = stmt.query([bucket]).unwrap();
 
     let mut metrics = vec![];
     while let Some(row) = rows.next().unwrap() {
         let m = MetricRow {
-            date: row.get(0).unwrap(),
-            data: row.get(1).unwrap(),
+            bucket: row.get(0).unwrap(),
+            date: row.get(1).unwrap(),
+            data: row.get(2).unwrap(),
         };
         metrics.push(m);
     }
