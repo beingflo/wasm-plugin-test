@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("DOMAIN env variable malformed");
 
     let app = Router::new()
-        .route("/push/:bucket", post(push_handler))
+        .route("/metrics/:bucket", post(push_handler))
         .route("/metrics/:bucket", get(metrics_handler))
         .layer(Extension(Arc::new(Mutex::new(conn))))
         .layer(
