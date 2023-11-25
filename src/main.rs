@@ -1,6 +1,5 @@
 mod metrics;
 mod migration;
-mod push;
 
 use std::sync::Arc;
 
@@ -10,9 +9,8 @@ use axum::{
     Extension, Router,
 };
 use dotenv::dotenv;
-use metrics::metrics_handler;
+use metrics::{bulk_insert_metrics, get_metrics, insert_metrics};
 use migration::apply_migrations;
-use push::push_handler;
 use rusqlite::Connection;
 use tokio::sync::Mutex;
 use tower_http::cors::{AllowHeaders, AllowMethods, CorsLayer};
@@ -32,8 +30,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("DOMAIN env variable malformed");
 
     let app = Router::new()
-        .route("/metrics/:bucket", post(push_handler))
-        .route("/metrics/:bucket", get(metrics_handler))
+        .route("/metrics/:bucket", post(insert_metrics))
+        .route("/metrics", post(bulk_insert_metrics))
+        .route("/metrics/:bucket", get(get_metrics))
         .layer(Extension(Arc::new(Mutex::new(conn))))
         .layer(
             CorsLayer::new()
