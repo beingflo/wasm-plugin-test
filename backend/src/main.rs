@@ -19,7 +19,7 @@ use tower_http::cors::{AllowHeaders, AllowMethods, CorsLayer};
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
 
-    let mut conn = Connection::open_in_memory()?;
+    let mut conn = Connection::open("./db.sqlite")?;
 
     apply_migrations(&mut conn);
 
