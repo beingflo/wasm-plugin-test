@@ -32,8 +32,8 @@ pub async fn get_metrics(
         metrics.push(m);
     }
 
-    let url = Wasm::file("./plugins/avg.wasm");
-    let manifest = Manifest::new([url]);
+    let file = Wasm::file("./plugins/avg.wasm");
+    let manifest = Manifest::new([file]);
     let mut plugin = Plugin::new(&manifest, [], true).unwrap();
 
     let extism::convert::Json(modified_metrics) = plugin
