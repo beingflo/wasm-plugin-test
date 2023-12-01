@@ -1,3 +1,4 @@
+use extism::*;
 use std::sync::Arc;
 
 use axum::{extract::Path, http::StatusCode, Extension, Json};
@@ -6,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tokio::sync::Mutex;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct MetricRow {
     date: Option<String>,
     data: Value,
@@ -31,7 +32,18 @@ pub async fn get_metrics(
         metrics.push(m);
     }
 
-    Json(metrics)
+    let url = Wasm::file("./plugins/clip.wasm");
+    let manifest = Manifest::new([url]);
+    let mut plugin = Plugin::new(&manifest, [], true).unwrap();
+
+    let extism::convert::Json(modified_metrics) = plugin
+        .call::<extism::convert::Json<Vec<MetricRow>>, extism::convert::Json<Vec<MetricRow>>>(
+            "clip",
+            extism::convert::Json(metrics),
+        )
+        .unwrap();
+
+    Json(modified_metrics)
 }
 
 #[derive(Deserialize, Debug)]
