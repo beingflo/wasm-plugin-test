@@ -19,7 +19,7 @@ pub async fn get_metrics(
 ) -> Json<Vec<MetricRow>> {
     let connection = connection.lock().await;
     let mut stmt = connection
-        .prepare("SELECT date, data FROM metrics WHERE bucket = ?1")
+        .prepare("SELECT date, data FROM metrics WHERE bucket = ?1 ORDER BY date")
         .unwrap();
     let mut rows = stmt.query([bucket]).unwrap();
 
@@ -32,13 +32,13 @@ pub async fn get_metrics(
         metrics.push(m);
     }
 
-    let url = Wasm::file("./plugins/clip.wasm");
+    let url = Wasm::file("./plugins/avg.wasm");
     let manifest = Manifest::new([url]);
     let mut plugin = Plugin::new(&manifest, [], true).unwrap();
 
     let extism::convert::Json(modified_metrics) = plugin
         .call::<extism::convert::Json<Vec<MetricRow>>, extism::convert::Json<Vec<MetricRow>>>(
-            "clip",
+            "avg",
             extism::convert::Json(metrics),
         )
         .unwrap();
