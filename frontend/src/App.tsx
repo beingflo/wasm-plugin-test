@@ -15,7 +15,7 @@ const App: Component = () => {
         <div class="grid grid-cols-2 gap-8">
           <Chart
             options={{
-              y: { grid: true },
+              y: { grid: true, label: "co2" },
               marks: [
                 Plot.lineY(
                   data()?.map((d) => ({ ...d, date: new Date(d.date) })),
@@ -26,7 +26,7 @@ const App: Component = () => {
           />
           <Chart
             options={{
-              y: { grid: true },
+              y: { grid: true, label: "temperature" },
               marks: [
                 Plot.lineY(
                   data()?.map((d) => ({ ...d, date: new Date(d.date) })),
