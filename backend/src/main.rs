@@ -1,7 +1,7 @@
 mod metrics;
 mod migration;
 
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use axum::{
     http::HeaderValue,
@@ -12,7 +12,6 @@ use dotenv::dotenv;
 use metrics::{bulk_insert_metrics, get_metrics, insert_metrics};
 use migration::apply_migrations;
 use rusqlite::Connection;
-use tokio::sync::Mutex;
 use tower_http::cors::{AllowHeaders, AllowMethods, CorsLayer};
 
 #[tokio::main]
