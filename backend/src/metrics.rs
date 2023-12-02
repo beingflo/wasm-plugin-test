@@ -20,7 +20,7 @@ host_fn!(query_db(connection: Arc<Mutex<Connection>>; query: String) -> extism::
     let mut stmt = connection
         .prepare(&query)
         .unwrap();
-    let mut rows = stmt.query(["living_room".to_owned()]).unwrap();
+    let mut rows = stmt.query([]).unwrap();
 
     let mut metrics = vec![];
     while let Some(row) = rows.next().unwrap() {

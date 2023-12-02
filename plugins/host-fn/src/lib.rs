@@ -17,7 +17,9 @@ pub struct Data {
 #[plugin_fn]
 pub fn host_fn() -> FnResult<Json<Vec<Data>>> {
     let result = unsafe {
-        query_db("SELECT date, data FROM metrics WHERE bucket = ?1 ORDER BY date".to_owned())
+        query_db(
+            "SELECT date, data FROM metrics WHERE bucket = 'living_room' ORDER BY date".to_owned(),
+        )
     };
 
     let Json(mut data) = result?;
