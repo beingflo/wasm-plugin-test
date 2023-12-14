@@ -1,7 +1,7 @@
 mod metrics;
 mod migration;
 
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use axum::{
     http::HeaderValue,
@@ -12,7 +12,13 @@ use dotenv::dotenv;
 use metrics::{bulk_insert_metrics, get_metrics, insert_metrics};
 use migration::apply_migrations;
 use rusqlite::Connection;
+use tokio::sync::Mutex;
 use tower_http::cors::{AllowHeaders, AllowMethods, CorsLayer};
+
+#[derive(Clone)]
+pub struct State {
+    conn: Arc<Mutex<Connection>>,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -32,7 +38,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/metrics/:bucket", post(insert_metrics))
         .route("/metrics", post(bulk_insert_metrics))
         .route("/metrics/:bucket", get(get_metrics))
-        .layer(Extension(Arc::new(Mutex::new(conn))))
+        .layer(Extension(State {
+            conn: Arc::new(Mutex::new(conn)),
+        }))
         .layer(
             CorsLayer::new()
                 .allow_origin(

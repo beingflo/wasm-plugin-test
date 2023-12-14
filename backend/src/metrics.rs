@@ -1,10 +1,10 @@
 use extism::*;
-use std::sync::{Arc, Mutex};
 
 use axum::{extract::Path, http::StatusCode, Extension, Json};
-use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+
+use crate::State;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MetricRow {
@@ -20,10 +20,10 @@ pub struct Data {
 
 pub async fn get_metrics(
     Path(bucket): Path<String>,
-    Extension(connection): Extension<Arc<Mutex<Connection>>>,
+    Extension(state): Extension<State>,
 ) -> Json<Vec<MetricRow>> {
     let metrics = {
-        let connection = connection.lock().unwrap();
+        let connection = state.conn.lock().await;
         let mut stmt = connection
             .prepare("SELECT date, data FROM metrics WHERE bucket = ?1 ORDER BY date")
             .unwrap();
@@ -62,10 +62,10 @@ pub struct PushMetric {
 
 pub async fn insert_metrics(
     Path(bucket): Path<String>,
-    connection: Extension<Arc<Mutex<Connection>>>,
+    state: Extension<State>,
     Json(body): Json<PushMetric>,
 ) -> StatusCode {
-    let result = connection.lock().unwrap().execute(
+    let result = state.conn.lock().await.execute(
         "INSERT INTO metrics (bucket, date, data) VALUES (?1, ?2, ?3)",
         (bucket, body.date.unwrap(), body.data.to_owned()),
     );
@@ -84,11 +84,11 @@ pub struct BulkPushMetric {
 }
 
 pub async fn bulk_insert_metrics(
-    connection: Extension<Arc<Mutex<Connection>>>,
+    state: Extension<State>,
     Json(body): Json<Vec<BulkPushMetric>>,
 ) -> StatusCode {
     for item in body.iter() {
-        let result = connection.lock().unwrap().execute(
+        let result = state.conn.lock().await.execute(
             "INSERT INTO metrics (bucket, date, data) VALUES (?1, ?2, ?3)",
             (
                 &item.bucket,
