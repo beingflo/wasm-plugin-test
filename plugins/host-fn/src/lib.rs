@@ -27,7 +27,7 @@ pub fn host_fn() -> FnResult<Json<Vec<Data>>> {
     for d in data.iter_mut() {
         let this_value = d.data["co2"].as_number().unwrap().as_i64().unwrap();
 
-        if this_value > 750 && this_value < 800 {
+        if this_value > 790 && this_value < 800 {
             d.data["co2"] = Value::Null;
         }
     }
