@@ -1,5 +1,3 @@
-use extism::*;
-
 use axum::{extract::Path, http::StatusCode, Extension, Json};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -40,9 +38,7 @@ pub async fn get_metrics(
         metrics
     };
 
-    let file = Wasm::file("./plugins/clip.wasm");
-    let manifest = Manifest::new([file]);
-    let mut plugin = Plugin::new(&manifest, [], true).unwrap();
+    let mut plugin = state.plugin.lock().await;
 
     let extism::convert::Json(modified_metrics) = plugin
         .call::<extism::convert::Json<Vec<MetricRow>>, extism::convert::Json<Vec<MetricRow>>>(

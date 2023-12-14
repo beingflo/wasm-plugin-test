@@ -9,6 +9,7 @@ use axum::{
     Extension, Router,
 };
 use dotenv::dotenv;
+use extism::{Manifest, Plugin, Wasm};
 use metrics::{bulk_insert_metrics, get_metrics, insert_metrics};
 use migration::apply_migrations;
 use rusqlite::Connection;
@@ -18,6 +19,7 @@ use tower_http::cors::{AllowHeaders, AllowMethods, CorsLayer};
 #[derive(Clone)]
 pub struct State {
     conn: Arc<Mutex<Connection>>,
+    plugin: Arc<Mutex<Plugin>>,
 }
 
 #[tokio::main]
@@ -34,12 +36,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .parse()
         .expect("DOMAIN env variable malformed");
 
+    let file = Wasm::file("./plugins/clip.wasm");
+    let manifest = Manifest::new([file]);
+    let plugin = Plugin::new(&manifest, [], true).unwrap();
+
     let app = Router::new()
         .route("/metrics/:bucket", post(insert_metrics))
         .route("/metrics", post(bulk_insert_metrics))
         .route("/metrics/:bucket", get(get_metrics))
         .layer(Extension(State {
             conn: Arc::new(Mutex::new(conn)),
+            plugin: Arc::new(Mutex::new(plugin)),
         }))
         .layer(
             CorsLayer::new()
