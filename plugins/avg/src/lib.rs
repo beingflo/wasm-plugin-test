@@ -11,7 +11,7 @@ pub struct MetricRow {
 }
 
 #[plugin_fn]
-pub fn avg(Json(data): Json<Vec<MetricRow>>) -> FnResult<Json<Vec<MetricRow>>> {
+pub fn run(Json(data): Json<Vec<MetricRow>>) -> FnResult<Json<Vec<MetricRow>>> {
     let mut values = Vec::new();
 
     let mut temp_window = VecDeque::new();

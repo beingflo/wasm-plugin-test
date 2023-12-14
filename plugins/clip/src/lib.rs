@@ -8,11 +8,11 @@ pub struct MetricRow {
 }
 
 #[plugin_fn]
-pub fn clip(Json(mut data): Json<Vec<MetricRow>>) -> FnResult<Json<Vec<MetricRow>>> {
+pub fn run(Json(mut data): Json<Vec<MetricRow>>) -> FnResult<Json<Vec<MetricRow>>> {
     for d in data.iter_mut() {
         let this_value = d.data["co2"].as_number().unwrap().as_i64().unwrap();
 
-        if this_value > 690 && this_value < 800 {
+        if this_value > 790 && this_value < 800 {
             d.data["co2"] = Value::Null;
         }
     }

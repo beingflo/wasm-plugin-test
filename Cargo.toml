@@ -5,5 +5,4 @@ members = [
     "backend",
     "plugins/clip",
     "plugins/avg",
-    "plugins/host-fn",
 ]

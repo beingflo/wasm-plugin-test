@@ -1080,16 +1080,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d77f7ec81a6d05a3abb01ab6eb7590f6083d08449fe5a1c8b1e620283546ccb7"
 
 [[package]]
-name = "host-fn"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "extism-pdk",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "http"
 version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
