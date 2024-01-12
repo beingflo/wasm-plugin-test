@@ -2,4 +2,3 @@
 **/dist
 **/target
 **/*.env
-**/db.sqlite
