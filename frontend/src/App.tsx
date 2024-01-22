@@ -10,7 +10,7 @@ const App: Component = () => {
 
   return (
     <div class="flex flex-col gap-4 p-8">
-      <p class="text-4xl font-bold">Charts</p>
+      <p class="text-4xl font-bold mb-8">Charts</p>
       <Show when={!data.loading}>
         <div class="flex flex-row gap-16">
           <Chart
@@ -19,7 +19,10 @@ const App: Component = () => {
               width: 800,
               marks: [
                 Plot.lineY(
-                  data()?.map((d) => ({ ...d, date: new Date(d.date) })),
+                  data()?.metrics?.map((d) => ({
+                    ...d,
+                    date: new Date(d.date),
+                  })),
                   { x: "date", y: (d) => d.data.co2 }
                 ),
               ],
@@ -31,12 +34,21 @@ const App: Component = () => {
               width: 800,
               marks: [
                 Plot.lineY(
-                  data()?.map((d) => ({ ...d, date: new Date(d.date) })),
+                  data()?.metrics?.map((d) => ({
+                    ...d,
+                    date: new Date(d.date),
+                  })),
                   { x: "date", y: (d) => d.data.temperature }
                 ),
               ],
             }}
           />
+          <div class="flex flex-col">
+            <span>Average temperature</span>
+            <div class="p-4 text-2xl">
+              {data()?.avg_temperature.toFixed(2)} °C
+            </div>
+          </div>
         </div>
       </Show>
     </div>

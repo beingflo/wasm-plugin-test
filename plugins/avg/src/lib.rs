@@ -13,14 +13,18 @@ pub struct Row {
     data: DataPoint,
 }
 
+#[derive(serde::Serialize)]
+pub struct ModifiedData {
+    metrics: Vec<Row>,
+    avg_temperature: f64,
+}
+
 #[plugin_fn]
-pub fn run(Json(mut data): Json<Vec<Row>>) -> FnResult<Json<Vec<Row>>> {
+pub fn run(Json(mut data): Json<Vec<Row>>) -> FnResult<Json<ModifiedData>> {
     let mut window = VecDeque::new();
 
     for d in data.iter_mut() {
-        let temperature = d.data.temperature;
-
-        window.push_back(temperature);
+        window.push_back(d.data.temperature);
 
         if window.len() > 1 {
             window.pop_front();
@@ -29,5 +33,7 @@ pub fn run(Json(mut data): Json<Vec<Row>>) -> FnResult<Json<Vec<Row>>> {
         d.data.temperature = window.iter().sum::<f64>() / window.len() as f64;
     }
 
-    Ok(Json(data))
+    let avg_temperature = data.iter().map(|d| d.data.temperature).sum::<f64>() / data.len() as f64 ;
+
+    Ok(Json(ModifiedData { metrics: data, avg_temperature }))
 }

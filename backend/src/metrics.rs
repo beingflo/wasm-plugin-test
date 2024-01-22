@@ -20,7 +20,7 @@ pub struct Data {
 pub async fn get_metrics(
     Path(bucket): Path<String>,
     Extension(state): Extension<State>,
-) -> Json<Vec<MetricRow>> {
+) -> Json<Value> {
     let metrics = {
         let connection = state.conn.lock().await;
         let mut stmt = connection
@@ -44,7 +44,7 @@ pub async fn get_metrics(
     let mut plugin = Plugin::new(&manifest, [], true).unwrap();
 
     let extism::convert::Json(modified_metrics) = plugin
-        .call::<extism::convert::Json<Vec<MetricRow>>, extism::convert::Json<Vec<MetricRow>>>(
+        .call::<extism::convert::Json<Vec<MetricRow>>, extism::convert::Json<Value>>(
             "run",
             extism::convert::Json(metrics),
         )
