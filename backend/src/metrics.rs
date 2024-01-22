@@ -1,6 +1,7 @@
 use axum::{extract::Path, http::StatusCode, Extension, Json};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use extism::{Manifest, Plugin, Wasm};
 
 use crate::State;
 
@@ -38,7 +39,9 @@ pub async fn get_metrics(
         metrics
     };
 
-    let mut plugin = state.plugin.lock().await;
+    let file = Wasm::file("./plugins/avg.wasm");
+    let manifest = Manifest::new([file]);
+    let mut plugin = Plugin::new(&manifest, [], true).unwrap();
 
     let extism::convert::Json(modified_metrics) = plugin
         .call::<extism::convert::Json<Vec<MetricRow>>, extism::convert::Json<Vec<MetricRow>>>(

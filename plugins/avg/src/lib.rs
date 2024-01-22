@@ -1,47 +1,33 @@
 use std::collections::VecDeque;
-
 use extism_pdk::*;
-use json::{Map, Number};
-use serde_json::Value;
 
 #[derive(serde::Deserialize, serde::Serialize)]
-pub struct MetricRow {
+pub struct DataPoint {
+    co2: i64,
+    temperature: f64,
+}
+
+#[derive(serde::Deserialize, serde::Serialize)]
+pub struct Row {
     date: String,
-    data: Value,
+    data: DataPoint,
 }
 
 #[plugin_fn]
-pub fn run(Json(data): Json<Vec<MetricRow>>) -> FnResult<Json<Vec<MetricRow>>> {
-    let mut values = Vec::new();
+pub fn run(Json(mut data): Json<Vec<Row>>) -> FnResult<Json<Vec<Row>>> {
+    let mut window = VecDeque::new();
 
-    let mut temp_window = VecDeque::new();
+    for d in data.iter_mut() {
+        let temperature = d.data.temperature;
 
-    for d in data.into_iter() {
-        let co2 = d.data["co2"].as_number().unwrap().as_i64().unwrap();
-        let temperature = d.data["temperature"].as_number().unwrap().as_f64().unwrap();
+        window.push_back(temperature);
 
-        temp_window.push_back(temperature);
-
-        if temp_window.len() > 5 {
-            temp_window.pop_front();
+        if window.len() > 1 {
+            window.pop_front();
         }
 
-        let mut map = Map::new();
-
-        map.insert("co2".to_owned(), Value::Number(Number::from(co2)));
-        map.insert(
-            "temperature".to_owned(),
-            Value::Number(
-                Number::from_f64(temp_window.iter().sum::<f64>() / temp_window.len() as f64)
-                    .unwrap(),
-            ),
-        );
-
-        values.push(MetricRow {
-            date: d.date,
-            data: Value::Object(map),
-        });
+        d.data.temperature = window.iter().sum::<f64>() / window.len() as f64;
     }
 
-    Ok(Json(values))
+    Ok(Json(data))
 }

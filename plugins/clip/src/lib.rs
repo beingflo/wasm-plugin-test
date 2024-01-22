@@ -1,19 +1,22 @@
 use extism_pdk::*;
-use serde_json::Value;
 
 #[derive(serde::Deserialize, serde::Serialize)]
-pub struct MetricRow {
+pub struct DataPoint {
+    co2: i64,
+    temperature: f64,
+}
+
+#[derive(serde::Deserialize, serde::Serialize)]
+pub struct Row {
     date: String,
-    data: Value,
+    data: DataPoint,
 }
 
 #[plugin_fn]
-pub fn run(Json(mut data): Json<Vec<MetricRow>>) -> FnResult<Json<Vec<MetricRow>>> {
+pub fn run(Json(mut data): Json<Vec<Row>>) -> FnResult<Json<Vec<Row>>> {
     for d in data.iter_mut() {
-        let this_value = d.data["co2"].as_number().unwrap().as_i64().unwrap();
-
-        if this_value > 790 && this_value < 800 {
-            d.data["co2"] = Value::Null;
+        if d.data.co2 > 850 {
+            d.data.co2 *= 2;
         }
     }
     Ok(Json(data))

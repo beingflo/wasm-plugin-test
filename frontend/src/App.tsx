@@ -10,12 +10,13 @@ const App: Component = () => {
 
   return (
     <div class="flex flex-col gap-4 p-8">
-      <p class="text-2xl">Living room</p>
+      <p class="text-4xl font-bold">Charts</p>
       <Show when={!data.loading}>
-        <div class="grid grid-cols-2 gap-8">
+        <div class="flex flex-row gap-16">
           <Chart
             options={{
               y: { grid: true, label: "co2" },
+              width: 800,
               marks: [
                 Plot.lineY(
                   data()?.map((d) => ({ ...d, date: new Date(d.date) })),
@@ -27,6 +28,7 @@ const App: Component = () => {
           <Chart
             options={{
               y: { grid: true, label: "temperature" },
+              width: 800,
               marks: [
                 Plot.lineY(
                   data()?.map((d) => ({ ...d, date: new Date(d.date) })),
