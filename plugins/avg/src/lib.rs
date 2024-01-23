@@ -23,6 +23,8 @@ pub struct ModifiedData {
 pub fn run(Json(mut data): Json<Vec<Row>>) -> FnResult<Json<ModifiedData>> {
     let mut window = VecDeque::new();
 
+    let avg_temperature = data.iter().map(|d| d.data.temperature).sum::<f64>() / data.len() as f64;
+
     for d in data.iter_mut() {
         window.push_back(d.data.temperature);
 
@@ -32,8 +34,6 @@ pub fn run(Json(mut data): Json<Vec<Row>>) -> FnResult<Json<ModifiedData>> {
 
         d.data.temperature = window.iter().sum::<f64>() / window.len() as f64;
     }
-
-    let avg_temperature = data.iter().map(|d| d.data.temperature).sum::<f64>() / data.len() as f64 ;
 
     Ok(Json(ModifiedData { metrics: data, avg_temperature }))
 }
